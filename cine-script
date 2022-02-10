@@ -9,8 +9,16 @@ function update()
     local run="$1"
     local script_name=$(basename $0)
     local script_path="$( cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
-    curl -s 'https://raw.githubusercontent.com/Blastoise/CineScript/master/cine-script' -o "/tmp/${script_name}.tmp"
+    local http_response=$(curl -s -w "%{http_code}" 'https://raw.githubusercontent.com/Blastoise/CineScript/master/cine-script' -o "/tmp/${script_name}.tmp")
     
+    if [[ $http_response != "200" ]]; then
+        if [[ $run == false ]]; then
+            echo "Something went wrong"
+            exit 1
+        fi
+        return 1
+    fi
+
     diff "/tmp/${script_name}.tmp" "${script_path}/${script_name}" > /dev/null 2>&1
 
     local status=$?
