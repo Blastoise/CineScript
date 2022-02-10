@@ -330,7 +330,7 @@ function get_data() {
         ((i+=1))
     done < /tmp/cine-script.txt
     
-    curl -s "https://1337x.wtf/category-search/${query}/${1}/1/" | grep -Eo "<a href=\"/torrent/[0-9]{1,}/[a-zA-Z0-9?%-]*/\">.+</a>" | sed -nE 's/<a href="\/(torrent\/[0-9]{1,}\/[a-zA-Z0-9?%-]*\/)">(.+)<\/a>/\2\n\1/p' | sed -E "s/\s*$//;s/^\s*//" > /tmp/cine-script.txt
+    curl -s "https://1337x.proxyninja.org/category-search/${query}/${1}/1/" | grep -Eo "<a href=\"/torrent/[0-9]{1,}/[a-zA-Z0-9?%-]*/\">.+</a>" | sed -nE 's/<a href="\/(torrent\/[0-9]{1,}\/[a-zA-Z0-9?%-]*\/)">(.+)<\/a>/\2\n\1/p' | sed -E "s/\s*$//;s/^\s*//" > /tmp/cine-script.txt
 
     i=0
     while IFS= read -r line; do
@@ -338,7 +338,7 @@ function get_data() {
         then
             content_name+=("$line")
         else
-            link+=("https://1337x.wtf/${line}")
+            link+=("https://1337x.proxyninja.org/${line}")
         fi
         ((i+=1))
     done < /tmp/cine-script.txt
@@ -359,7 +359,7 @@ function get_data() {
 
 function content_selection() {
     clear
-    local torrent_info=$(webtorrent "$MAGNET" --select)
+    local torrent_info=$(webtorrent "$MAGNET" --select --"$VIDEO_PLAYER")
     local torrent_info_lines=$(echo "$torrent_info" | wc -l)
     echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
     echo -ne "\033[0;37m \u2193 \033[0m : \033[0;36m Down \033[0m \t"
@@ -400,7 +400,7 @@ function main() {
     local actions=('Download Youtube Video' "Download Movie" "Stream Movie" "Download TV Series" "Stream TV Series" "Exit")
 
     single_select_menu "${actions[@]}"
-    local action_choice=$SELECT_action_
+    local action_choice=$SELECT_CHOICE
 
     case $action_choice in
         "0")
