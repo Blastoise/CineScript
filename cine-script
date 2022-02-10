@@ -1,0 +1,450 @@
+#!/bin/bash
+
+VIDEO_PLAYER="mpv"
+MAGNET=""
+SELECT_CHOICE=""
+
+function update()
+{
+    local run="$1"
+    local script_name=$(basename $0)
+    local script_path="$( cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
+    curl -s 'https://raw.githubusercontent.com/Blastoise/CineScript/master/main.sh' -o "/tmp/${script_name}.tmp"
+    
+    diff "/tmp/${script_name}.tmp" "${script_path}/${script_name}" > /dev/null 2>&1
+
+    local status=$?
+    if [[ $status != 0 ]]; then
+
+        echo "Updating Script..."
+        local OCTAL_MODE=$(stat -c '%a' "${script_path}/${script_name}")
+    
+        if ! chmod $OCTAL_MODE "/tmp/${script_name}.tmp" ; then
+        echo "Failed: Error while trying to set mode on /tmp/${script_name}.tmp."  
+        exit 1
+        fi
+
+        sudo mv "/tmp/${script_name}.tmp" "${script_path}/${script_name}"
+        echo "Script Updated"
+        if [[ $run == true ]]; then
+            exec "${script_path}/${script_name}"
+        fi
+        exit 1
+    fi
+}
+
+
+function multiselect_menu {
+    # little helpers for terminal print control and key input
+    local ESC=$( printf "\033")
+    cursor_blink_on()  { printf "$ESC[?25h"; }
+    cursor_blink_off() { printf "$ESC[?25l"; }
+    cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
+    clear_line()       { printf "$ESC[2K\r"; }
+    print_option()     { printf "$2   $1 "; }
+    print_selected()   { printf "$2  $ESC[7m $1 $ESC[27m"; }
+    get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
+    key_input()        { read -s -n1 key 2>/dev/null >&2
+                         if [[ $key = "" ]]; then
+                            echo enter;
+                         elif [[ $key = 'm' ]]; then echo space;
+                         elif [[ $key = "$ESC" ]]; then
+                            read -s -n2 key 2>/dev/null >&2
+                            if [[ $key = "[A" ]]; then
+                                echo up;
+                            elif [[ $key = "[B" ]]; then 
+                                echo down;
+                            else
+                                echo random;
+                            fi
+                         else
+                            echo random;
+                         fi
+                        } 
+    
+    # Function for toggling an option
+    toggle_option() {
+        local option=$1
+        if [[ ${selected[option]} == true ]]; then
+            selected[option]=false
+        else
+            selected[option]=true
+        fi
+    }
+
+    # Choice user selected
+    final_steps() {
+        # $1 received is the total number of items
+        SELECT_CHOICE=""
+        for ((i=0; i<$1; i++)); do
+            if [[ "${selected[${i}]}" == "true" ]]; then
+                SELECT_CHOICE="${SELECT_CHOICE} $i,"
+            fi
+        done
+        SELECT_CHOICE=$(echo "$SELECT_CHOICE" |sed 's/,$//')
+    }
+
+    # Contains which element is selected
+    local selected=()
+    for ((i=0; i<$#; i++)); do
+        selected+=("false")
+    done
+    
+    # Calculating maximum number of items that can be displayed on terminal
+    local max_items=$(tput lines)
+    ((max_items=max_items-2))
+
+    # Getting the minimum of max_items and size of list to display
+    local ans=$(echo -e "$#\n$max_items" | sort -n | head -1)
+    
+    # initially print empty new lines (scroll down if at bottom of screen)
+    for (( i=1; i<=ans; i++ )); do
+        printf "\n";
+    done
+
+    # determine current screen position for overwriting the options
+    local lastrow=`get_cursor_row`
+    local startrow=$(($lastrow - $ans))
+
+    # ensure cursor and input echoing back on upon a ctrl+c during read -s
+    trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
+    cursor_blink_off
+
+    # Active Row
+    local selected_row=0
+    # Starting Index
+    local start_idx=0
+    while true; do
+        # print options by overwriting the last lines
+        
+        # Array Iteration Variable
+        local arr_index=0
+        # Row Index to be overwritten
+        local row_no=0
+        for opt; do
+            if (( arr_index >= start_idx && arr_index - start_idx < ans)); then
+                # Whether selected or not
+                local prefix="[ ]"
+                if [[ ${selected[arr_index]} == true ]]; then
+                    prefix="[\e[38;5;46m✔\e[0m]"
+                fi
+                cursor_to $(($startrow + $row_no))
+                clear_line
+                if [ $row_no -eq $selected_row ]; then
+                    print_selected "$opt" "$prefix"
+                else
+                    print_option "$opt" "$prefix"
+                fi
+                ((row_no++))
+            fi
+            ((arr_index++))
+        done
+
+        # user key control
+        case `key_input` in
+            enter) final_steps $#; break;;
+            up)    ((selected_row--));
+                   max_start_idx=$(($#-$ans))
+                   if [ $selected_row -lt 0 ]; then 
+                    selected_row=0;
+                    ((start_idx--));
+                   fi
+                   if (( start_idx < 0)); then
+                    start_idx=$max_start_idx
+                    selected_row=$((ans-1))
+                   fi 
+                   ;;
+            down)  ((selected_row++));
+                    max_start_idx=$(($#-$ans))
+                   if [ $selected_row -ge $ans ]; then
+                    selected_row=$((ans-1));
+                    ((start_idx++)); 
+                   fi
+                   if (( start_idx > max_start_idx )); then
+                    start_idx=0; selected_row=0; fi
+                   ;;
+            space) toggle_option $((selected_row+start_idx));;
+            *) ;;
+        esac
+    done
+
+    # cursor position back to normal
+    cursor_to $lastrow
+    printf "\n"
+    cursor_blink_on
+}
+
+
+
+function single_select_menu {
+
+    # little helpers for terminal print control and key input
+    ESC=$( printf "\033")
+    cursor_blink_on()  { printf "$ESC[?25h"; }
+    cursor_blink_off() { printf "$ESC[?25l"; }
+    cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
+    clear_line()       { printf "$ESC[2K\r"; }
+    print_option()     { printf "   $1 "; }
+    print_selected()   { printf "  $ESC[7m $1 $ESC[27m"; }
+    get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
+    key_input()        { read -s -n1 key 2>/dev/null >&2
+                         if [[ $key = "" ]]; then
+                            echo enter;
+                         elif [[ $key = "$ESC" ]]; then
+                            read -s -n2 key 2>/dev/null >&2
+                            if [[ $key = "[A" ]]; then
+                                echo up;
+                            elif [[ $key = "[B" ]]; then 
+                                echo down;
+                            else
+                                echo random;
+                            fi
+                         else
+                            echo random;
+                         fi
+                        } 
+                         
+    
+    # Calculating maximum number of items that can be displayed on terminal
+    local max_items=$(tput lines)
+    ((max_items=max_items-2))
+
+    # Getting the minimum of max_items and size of list to display
+    local ans=$(echo -e "$#\n$max_items" | sort -n | head -1)
+    
+    # initially print empty new lines (scroll down if at bottom of screen)
+    for (( i=1; i<=ans; i++ )); do
+        printf "\n";
+    done
+
+    # determine current screen position for overwriting the options
+    local lastrow=`get_cursor_row`
+    local startrow=$(($lastrow - $ans))
+
+    # ensure cursor and input echoing back on upon a ctrl+c during read -s
+    trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
+    cursor_blink_off
+
+    # Active Row
+    local selected_row=0
+    # Starting Index
+    local start_idx=0
+    while true; do
+        # print options by overwriting the last lines
+        # Array Iteration Variable
+        local arr_index=0
+        # Row Index to be overwritten
+        local row_no=0
+        for opt; do
+            if (( arr_index >= start_idx && arr_index - start_idx < ans)); then
+                cursor_to $(($startrow + $row_no))
+                clear_line
+                if [ $row_no -eq $selected_row ]; then
+                    print_selected "$opt"
+                else
+                    print_option "$opt"
+                fi
+                ((row_no++))
+            fi
+            ((arr_index++))
+        done
+
+        # user key control
+        case `key_input` in
+            enter) break;;
+            up)    ((selected_row--));
+                   max_start_idx=$(($#-$ans))
+                   if [ $selected_row -lt 0 ]; then 
+                    selected_row=0;
+                    ((start_idx--));
+                   fi
+                   if (( start_idx < 0)); then
+                    start_idx=$max_start_idx
+                    selected_row=$((ans-1))
+                   fi 
+                   ;;
+            down)  ((selected_row++));
+                    max_start_idx=$(($#-$ans))
+                   if [ $selected_row -ge $ans ]; then
+                    selected_row=$((ans-1));
+                    ((start_idx++)); 
+                   fi
+                   if (( start_idx > max_start_idx )); then
+                    start_idx=0; selected_row=0; fi
+                   ;;
+            *) ;;
+        esac
+    done
+
+    # cursor position back to normal
+    cursor_to $lastrow
+    printf "\n"
+    cursor_blink_on
+
+    SELECT_CHOICE=$((selected_row+start_idx))
+}
+
+function yt_downloader() {
+    clear
+    read -r -p "Enter the url of the video: " url
+    echo
+    local yt_options=("Audio Download" "Video Download")
+    single_select_menu "${yt_options[@]}"
+    if [[ $SELECT_CHOICE == "0" ]]; then
+        youtube-dl -x --audio-format mp3 --audio-quality 0 --embed-thumbnail "$url"
+    else
+        youtube-dl "$url"
+    fi
+    
+}
+
+
+function get_data() {
+    local name
+    read -r -p "Enter the name of the Movie/TV Series: " name
+    local query=$(echo "$name" | tr ' ' '+')
+
+    local content_name=()
+    local link=()
+    local magnets=()
+
+    curl -s "https://pirate-proxy.cc/newapi/q.php?q=${query}&cat=$2" | jq '.[] | {name, info_hash}' | grep "^\s*\"name\|^\s*\"info_hash" | sed -nE 's/"name":\s*"(.*)",|"info_hash":\s*"(.*)"/\1\2/p' | sed -n "s/^\s*//p" > /tmp/cine-script.txt
+
+    local i=0
+    while IFS= read -r line; do
+        if (($i%2==0))
+        then
+            content_name+=("$line")
+        else
+            magnets+=("magnet:?xt=urn:btih:${line}")
+            link+=("-1")
+        fi
+        ((i+=1))
+    done < /tmp/cine-script.txt
+    
+    curl -s "https://1337x.wtf/category-search/${query}/${1}/1/" | grep -Eo "<a href=\"/torrent/[0-9]{1,}/[a-zA-Z0-9?%-]*/\">.+</a>" | sed -nE 's/<a href="\/(torrent\/[0-9]{1,}\/[a-zA-Z0-9?%-]*\/)">(.+)<\/a>/\2\n\1/p' | sed -E "s/\s*$//;s/^\s*//" > /tmp/cine-script.txt
+
+    i=0
+    while IFS= read -r line; do
+        if (($i%2==0))
+        then
+            content_name+=("$line")
+        else
+            link+=("https://1337x.wtf/${line}")
+        fi
+        ((i+=1))
+    done < /tmp/cine-script.txt
+
+    clear
+    echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
+    echo -ne "\033[0;37m \u2193 \033[0m : \033[0;36m Down \033[0m \t"
+    echo -e "\033[0;37m \u23CE (Enter) \033[0m : \033[0;36m Confirm Selection \033[0m \t"
+    single_select_menu "${content_name[@]}"
+    
+    if [[ "${link[${SELECT_CHOICE}]}" == "-1" ]]
+    then
+        MAGNET="${magnets[${SELECT_CHOICE}]}"
+    else
+        MAGNET=$(curl -s "${link[${SELECT_CHOICE}]}" | grep -o "magnet:?xt=urn:btih:[a-zA-Z0-9]*" | head -1)
+    fi
+}
+
+function content_selection() {
+    clear
+    local torrent_info=$(webtorrent "$MAGNET" --select)
+    local torrent_info_lines=$(echo "$torrent_info" | wc -l)
+    echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
+    echo -ne "\033[0;37m \u2193 \033[0m : \033[0;36m Down \033[0m \t"
+    echo -ne "\033[0;37m m \033[0m: \033[0;36m Toggle Selection \033[0m \t"
+    echo -e "\033[0;37m \u23CE (Enter) \033[0m : \033[0;36m Confirm Selection \033[0m \t"
+    echo "$torrent_info" | grep -A${torrent_info_lines} -m1 "Select a file to download:" | grep -E "^[0-9]+\s*.*" > /tmp/cine-script.txt
+    
+    local torrent_info_array=()
+    
+    while IFS= read -r line; do
+        torrent_info_array+=("${line}")
+    done < /tmp/cine-script.txt
+
+    multiselect_menu "${torrent_info_array[@]}"
+    if [[ "$SELECT_CHOICE" != "" ]]; then
+        webtorrent "$MAGNET" --select "$SELECT_CHOICE" "$1"
+    else
+        echo "Exiting..."
+    fi
+}
+
+
+function download_content() {
+    content_selection ""
+}
+
+function stream_content() {
+    content_selection "--$VIDEO_PLAYER"
+}
+
+function main() {
+    clear
+    echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
+    echo -ne "\033[0;37m \u2193 \033[0m : \033[0;36m Down \033[0m \t"
+    echo -e "\033[0;37m \u23CE (Enter) \033[0m : \033[0;36m Confirm Selection \033[0m \t\n"
+
+
+    local actions=('Download Youtube Video' "Download Movie" "Stream Movie" "Download TV Series" "Stream TV Series" "Exit")
+
+    single_select_menu "${actions[@]}"
+    local action_choice=$SELECT_action_
+
+    case $action_choice in
+        "0")
+        yt_downloader
+        ;;
+        "1")
+        get_data Movies 207
+        download_content
+        ;;
+        "2")
+        get_data Movies 207
+        stream_content
+        ;;
+        "3")
+        get_data TV 208
+        download_content
+        ;;
+        "4")
+        get_data TV 208
+        stream_content
+        ;;
+        "5")
+        echo "  Exiting.."
+        ;;
+        *)
+        echo "  Invalid Choice"
+        ;;
+    esac
+}
+
+while getopts ':uh' opt; do
+  case "$opt" in
+    u)
+      echo "Checking for updates..."
+      update "false"
+      echo "Already up-to-date"
+      exit 0
+      ;;
+    
+    h)
+      echo "Usage: $(basename $0) [-u] [-h]"
+      exit 0
+      ;;
+
+    ?)
+      echo -e "Invalid command option.\nUsage: $(basename $0) [-u] [-h]"
+      exit 1
+      ;;
+  esac
+done
+shift "$(($OPTIND -1))"
+
+
+update "true"
+main
