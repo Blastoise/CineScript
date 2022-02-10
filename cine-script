@@ -9,7 +9,7 @@ function update()
     local run="$1"
     local script_name=$(basename $0)
     local script_path="$( cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 ; pwd -P )"
-    curl -s 'https://raw.githubusercontent.com/Blastoise/CineScript/master/main.sh' -o "/tmp/${script_name}.tmp"
+    curl -s 'https://raw.githubusercontent.com/Blastoise/CineScript/master/cine-script' -o "/tmp/${script_name}.tmp"
     
     diff "/tmp/${script_name}.tmp" "${script_path}/${script_name}" > /dev/null 2>&1
 
