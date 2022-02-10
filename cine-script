@@ -359,6 +359,7 @@ function get_data() {
 
 function content_selection() {
     clear
+    # VIDEO_PLAYER added to avoid creation of folder in current directory
     local torrent_info=$(webtorrent "$MAGNET" --select --"$VIDEO_PLAYER")
     local torrent_info_lines=$(echo "$torrent_info" | wc -l)
     echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
