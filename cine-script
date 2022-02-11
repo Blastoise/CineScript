@@ -1,8 +1,24 @@
 #!/bin/bash
 
-VIDEO_PLAYER="mpv"
+VIDEO_PLAYER=""
 MAGNET=""
 SELECT_CHOICE=""
+
+function set_video_player() {
+    local dir=~/.config/cine-script
+    mkdir -p "$dir"
+    if [ -z "$1" ]; then
+        if [[ -f "$dir/config.txt" ]]; then
+            VIDEO_PLAYER=$(cat "$dir/config.txt")
+        else
+            echo "vlc" > "$dir/config.txt"
+            VIDEO_PLAYER="vlc"
+        fi
+    else
+        echo "$1" > "$dir/config.txt"
+        exit 0
+    fi
+}
 
 function update()
 {
@@ -432,7 +448,7 @@ function main() {
     esac
 }
 
-while getopts ':uh' opt; do
+while getopts ':up:h' opt; do
   case "$opt" in
     u)
       echo "Checking for updates..."
@@ -441,19 +457,46 @@ while getopts ':uh' opt; do
       exit 0
       ;;
     
+    p) 
+        arg="$OPTARG"
+        possible_players=("airplay" "chromecast" "dlna" "mplayer" "mpv" "omx" "vlc" "iina" "smplayer" "xbmc")
+        flag="false"
+
+        for i in "${possible_players[@]}"
+        do
+            if [[ "$arg" == "$i" ]]; then
+                flag="true"
+                break;
+            fi
+        done
+
+        if [[ $flag == "true" ]]; then
+            set_video_player  "$arg"
+            exit 0
+        else
+            echo "Invalid player name. Provide player name in small caps"
+            exit 1
+        fi
+        ;;
+    
     h)
-      echo "Usage: $(basename $0) [-u] [-h]"
+      echo "Usage: $(basename $0) [-u] [-h] [-p arg]"
       exit 0
+      ;;
+    
+    :)
+      echo -e "Option requires an argument.\nUsage: $(basename $0) [-u] [-h] [-p arg]"
+      exit 1
       ;;
 
     ?)
-      echo -e "Invalid command option.\nUsage: $(basename $0) [-u] [-h]"
+      echo -e "Invalid command option.\nUsage: $(basename $0) [-u] [-h] [-p arg]"
       exit 1
       ;;
   esac
 done
 shift "$(($OPTIND -1))"
 
-
 update "true"
+set_video_player
 main
