@@ -60,14 +60,14 @@ CineScript is one stop solution for downloading/streaming content. It provides T
   2.  Installing jq:
 
             sudo apt-get install jq
-            
+
+
 - Then install youtube-dl using the following commands:
 
         sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
         sudo chmod a+rx /usr/local/bin/youtube-dl
 
 - Then download cine-script file and move it to **_~/.local/bin_** with execute permission. To do so use the following command:
-        
         curl -s 'https://raw.githubusercontent.com/Blastoise/CineScript/master/cine-script' -o ~/.local/bin/cine-script
         chmod +x ~/.local/bin/cine-script
 
@@ -89,12 +89,10 @@ To see the complete usage of the script:
 
     cine-script -h
 
-
-
 ## 🤝 Contribute [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
 
 If you are interested in participating in joint development, PR and Forks are welcome!
 
 ## 📜 License
 
-[MIT](https://opensource.org/licenses/MIT) Copyright (c) 2021 Ashutosh Kumar
+[GNU GENERAL PUBLIC LICENSE](LICENSE) Copyright (c) 2022 Ashutosh Kumar
