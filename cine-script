@@ -360,7 +360,7 @@ function get_data() {
 function content_selection() {
     clear
     # VIDEO_PLAYER added to avoid creation of folder in current directory
-    local torrent_info=$(webtorrent "$MAGNET" --select --"$VIDEO_PLAYER")
+    local torrent_info=$(web-torrent-cli "$MAGNET" --select --"$VIDEO_PLAYER")
     local torrent_info_lines=$(echo "$torrent_info" | wc -l)
     echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
     echo -ne "\033[0;37m \u2193 \033[0m : \033[0;36m Down \033[0m \t"
@@ -376,7 +376,7 @@ function content_selection() {
 
     multiselect_menu "${torrent_info_array[@]}"
     if [[ "$SELECT_CHOICE" != "" ]]; then
-        webtorrent "$MAGNET" --select "$SELECT_CHOICE" "$1"
+        web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE" "$1"
     else
         echo "Exiting..."
     fi
