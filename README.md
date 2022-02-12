@@ -7,7 +7,7 @@
 [![forthebadge](https://forthebadge.com/images/badges/built-with-swag.svg)](https://forthebadge.com)
 [![Bash Shell](https://img.shields.io/static/v1?label=MADE%20WITH&message=BASH&color=red&style=for-the-badge&logo=gnu-bash)](https://shields.io/)
 
-CineScript is one stop solution for downloading/streaming content. It provides TUI(Terminal User Interface) which is completely written in bash. Currently, CineScript supports Linux and MacOS. But you might see support for WSL in Windows in future soon.
+CineScript is one stop solution for downloading/streaming content. It provides TUI(Terminal User Interface) which is completely written in bash. Currently, CineScript supports Linux, MacOS and WSL.
 
 ## ✨ Features
 
@@ -22,7 +22,7 @@ CineScript is one stop solution for downloading/streaming content. It provides T
   - Multi Select Menu
 - 📺 Supports many Media Players
 - ⟳ Automatic updates￻￻
-- 🚀 Available for Linux and MacOS
+- 🚀 Available for Linux, MacOS and WSL
 - 🛠️ More features in development.
 
 ## Dependencies
@@ -46,6 +46,10 @@ CineScript is one stop solution for downloading/streaming content. It provides T
 
 ## Setup Instructions
 
+- If you're a WSL user, you can use the following command and skip this section:
+  
+      curl -s 'https://gist.githubusercontent.com/Blastoise/c94b90b09ad3c4e9341ea7cc63eb3c81/raw/371ea873c9415df3b2f7c848ff769c19a83f2dce/cine-install.sh' | sudo bash 
+      
 - First download and install **Node.js** and **npm**
 - Then install **@ashutosh1729/web-torrent-cli** npm package globally using the following command:
 
