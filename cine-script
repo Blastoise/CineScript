@@ -346,18 +346,18 @@ function get_data() {
         ((i+=1))
     done < /tmp/cine-script.txt
     
-    curl -s "https://1337x.unblockit.cam/category-search/${query}/${1}/1/" | grep -Eo "<a href=\"/torrent/[0-9]{1,}/[a-zA-Z0-9?%-]*/\">.+</a>" | sed -nE 's/<a href="\/(torrent\/[0-9]{1,}\/[a-zA-Z0-9?%-]*\/)">(.+)<\/a>/\2\n\1/p' | sed -E "s/\s*$//;s/^\s*//" > /tmp/cine-script.txt
+    # curl -s "https://1337x.unblockit.cam/category-search/${query}/${1}/1/" | grep -Eo "<a href=\"/torrent/[0-9]{1,}/[a-zA-Z0-9?%-]*/\">.+</a>" | sed -nE 's/<a href="\/(torrent\/[0-9]{1,}\/[a-zA-Z0-9?%-]*\/)">(.+)<\/a>/\2\n\1/p' | sed -E "s/\s*$//;s/^\s*//" > /tmp/cine-script.txt
 
-    i=0
-    while IFS= read -r line; do
-        if (($i%2==0))
-        then
-            content_name+=("$line")
-        else
-            link+=("https://1337x.proxyninja.org/${line}")
-        fi
-        ((i+=1))
-    done < /tmp/cine-script.txt
+    # i=0
+    # while IFS= read -r line; do
+    #     if (($i%2==0))
+    #     then
+    #         content_name+=("$line")
+    #     else
+    #         link+=("https://1337x.proxyninja.org/${line}")
+    #     fi
+    #     ((i+=1))
+    # done < /tmp/cine-script.txt
 
     clear
     echo -ne "\033[0;37m \u2191 \033[0m : \033[0;36m Up \033[0m \t"
