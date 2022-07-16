@@ -392,7 +392,11 @@ function content_selection() {
 
     multiselect_menu "${torrent_info_array[@]}"
     if [[ "$SELECT_CHOICE" != "" ]]; then
-        web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE" "$1"
+        if [[ "$1" != "" ]]; then
+            web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE" "$1"
+        else
+            web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE"
+        fi
     else
         echo "Exiting..."
     fi
