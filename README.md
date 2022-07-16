@@ -38,6 +38,7 @@ CineScript is one stop solution for downloading/streaming content. It provides T
   - DNLA
   - MPlayer
   - MPV
+  - Celluloid
   - OMX
   - VLC
   - IINA
@@ -47,9 +48,9 @@ CineScript is one stop solution for downloading/streaming content. It provides T
 ## Setup Instructions
 
 - If you're a WSL user, you can use the following command and skip this section:
-  
-      curl -s 'https://gist.githubusercontent.com/Blastoise/c94b90b09ad3c4e9341ea7cc63eb3c81/raw/a7c79c6713ddb0ed329f7572324ae67d3133e170/cine-install.sh' | sudo bash 
-      
+
+      curl -s 'https://gist.githubusercontent.com/Blastoise/c94b90b09ad3c4e9341ea7cc63eb3c81/raw/a7c79c6713ddb0ed329f7572324ae67d3133e170/cine-install.sh' | sudo bash
+
 - First download and install **Node.js** and **npm**
 - Then install **@ashutosh1729/web-torrent-cli** npm package globally using the following command:
 
@@ -64,7 +65,6 @@ CineScript is one stop solution for downloading/streaming content. It provides T
   2.  Installing jq:
 
             sudo apt-get install jq
-
 
 - Then install **youtube-dl** using the following commands:
 

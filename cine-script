@@ -393,7 +393,7 @@ function content_selection() {
     multiselect_menu "${torrent_info_array[@]}"
     if [[ "$SELECT_CHOICE" != "" ]]; then
         if [[ "$1" != "" ]]; then
-            web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE" "$1"
+            web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE" "$1" --not-on-top
         else
             web-torrent-cli "$MAGNET" --select "$SELECT_CHOICE"
         fi
@@ -463,7 +463,7 @@ while getopts ':up:h' opt; do
     
     p) 
         arg="$OPTARG"
-        possible_players=("airplay" "chromecast" "dlna" "mplayer" "mpv" "omx" "vlc" "iina" "smplayer" "xbmc")
+        possible_players=("airplay" "chromecast" "dlna" "mplayer" "mpv" "celluloid" "omx" "vlc" "iina" "smplayer" "xbmc")
         flag="false"
 
         for i in "${possible_players[@]}"
@@ -478,7 +478,7 @@ while getopts ':up:h' opt; do
             set_video_player  "$arg"
             exit 0
         else
-            echo "Invalid player name. Provide player name in small caps"
+            echo "Invalid player name. Currently suppored players are: $(echo ${possible_players[@]} | sed 's/ /, /g')"
             exit 1
         fi
         ;;
