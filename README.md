@@ -29,7 +29,7 @@ CineScript is one stop solution for downloading/streaming content. It provides T
 
 - [NodeJS](https://nodejs.org/en/download/)
 - [@ashutosh1729/web-torrent-cli](https://www.npmjs.com/package/@ashutosh1729/web-torrent-cli)
-- [youtube-dl](https://github.com/ytdl-org/youtube-dl/)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [jq](https://github.com/stedolan/jq)
 - [cURL](https://curl.se/)
 - Any one of the following media players:
@@ -66,10 +66,10 @@ CineScript is one stop solution for downloading/streaming content. It provides T
 
             sudo apt-get install jq
 
-- Then install **youtube-dl** using the following commands:
+- Then install **yt-dlp** using the following commands:
 
-        sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
-        sudo chmod a+rx /usr/local/bin/youtube-dl
+        sudo curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp
+        sudo chmod a+rx /usr/local/bin/yt-dlp
 
 - Then download **cine-script** file and move it to **_~/.local/bin_** with execute permission. To do so use the following command:
 

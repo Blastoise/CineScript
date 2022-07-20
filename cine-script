@@ -315,9 +315,9 @@ function yt_downloader() {
     local yt_options=("Audio Download" "Video Download")
     single_select_menu "${yt_options[@]}"
     if [[ $SELECT_CHOICE == "0" ]]; then
-        youtube-dl -x --audio-format mp3 --audio-quality 0 --embed-thumbnail "$url"
+        yt-dlp -x --audio-format mp3 --audio-quality 0 --embed-thumbnail "$url"
     else
-        youtube-dl "$url"
+        yt-dlp "$url"
     fi
     
 }
