@@ -2,9 +2,9 @@
 
 # CineScript
 
-[![forthebadge](https://forthebadge.com/images/badges/open-source.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/built-with-swag.svg)](https://forthebadge.com)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/open-source.svg)](https://forthebadge.com)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/built-with-love.svg)](https://forthebadge.com)
+[![forthebadge](https://github.com/BraveUX/for-the-badge/blob/master/src/images/badges/built-with-swag.svg)](https://forthebadge.com)
 [![Bash Shell](https://img.shields.io/static/v1?label=MADE%20WITH&message=BASH&color=red&style=for-the-badge&logo=gnu-bash)](https://shields.io/)
 
 CineScript is one stop solution for downloading/streaming content. It provides TUI(Terminal User Interface) which is completely written in bash. Currently, CineScript supports Linux, MacOS and WSL.
